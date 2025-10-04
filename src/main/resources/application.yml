@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/menus
+    username: redis
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog/master.yaml
+    drop-first: false
+
+redis:
+  server:
+    url: redis://localhost:6380
+
+server:
+  port: 8181
+
