@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/menus
+    url: jdbc:postgresql://localhost:5432/menus
     username: redis
     password: password
     driver-class-name: org.postgresql.Driver
@@ -15,7 +15,7 @@ spring:
 
 redis:
   server:
-    url: redis://localhost:6380
+    url: redis://localhost:6379
 
 server:
   port: 8181
