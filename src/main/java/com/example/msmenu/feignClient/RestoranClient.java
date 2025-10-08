@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
         name = "ms.restoran",
-        url = "http://localhost:8080/api/v1/restorans"
+        url = "${ms.restoran.url}"
 )
 public interface RestoranClient {
     @GetMapping("/{id}")

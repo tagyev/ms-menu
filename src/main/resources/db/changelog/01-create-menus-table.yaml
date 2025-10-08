@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 01-create-menus-table
-      author: yourname
+      author: tagyev
       changes:
         - createTable:
             tableName: menus

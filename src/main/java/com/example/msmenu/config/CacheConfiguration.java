@@ -1,4 +1,4 @@
-package com.example.msmenu.confiq;
+package com.example.msmenu.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

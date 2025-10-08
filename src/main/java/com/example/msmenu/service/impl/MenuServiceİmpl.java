@@ -7,7 +7,7 @@ import com.example.msmenu.dto.request.OrderRequest;
 import com.example.msmenu.dto.request.PaymentRequest;
 import com.example.msmenu.dto.response.MenuResponse;
 import com.example.msmenu.dto.response.PaymentResponse;
-import com.example.msmenu.exception.MenuNotFoundException;
+import com.example.msmenu.exception.NotFoundException;
 import com.example.msmenu.feignClient.PaymentClient;
 import com.example.msmenu.feignClient.RestoranClient;
 import com.example.msmenu.mapper.MenuMapping;
@@ -28,7 +28,7 @@ import static lombok.AccessLevel.PRIVATE;
 @RequiredArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class MenuServiceİmpl implements MenuService {
-    MenuRepository repository;
+    MenuRepository menuRepository;
     CacheUtil util;
     PaymentClient paymentClient;
     RestoranClient restoranClient;
@@ -37,9 +37,8 @@ public class MenuServiceİmpl implements MenuService {
     public MenuResponse save(MenuRequest request) {
         restoranClient.findById(request.getRestoranId());
         MenuEntity entity = MenuMapping.MENU.requestToEntity(request);
-        repository.save(entity);
+        menuRepository.save(entity);
         util.set(getKey(entity.getId()), entity, 10, TimeUnit.MINUTES);
-        System.out.println("🟢 DB-dən oxundu və Redis-ə yazıldı!");
         return MenuMapping.MENU.entityToResponse(entity);
     }
 
@@ -47,20 +46,18 @@ public class MenuServiceİmpl implements MenuService {
     public MenuResponse findById(Long id) {
         MenuEntity entitycache = util.get(getKey(id), MenuEntity.class);
         if (entitycache != null) {
-            System.out.println("🔴 Redis-dən oxundu!");
             return MenuMapping.MENU.entityToResponse(entitycache);
         }
         MenuEntity entity = fetchMenuIfExist(id);
         util.set(getKey(entity.getId()), entity, 10, TimeUnit.MINUTES);
-        System.out.println("🟢 DB-dən oxundu və Redis-ə yazıldı!");
         return MenuMapping.MENU.entityToResponse(entity);
     }
 
     @Override
     public PaymentResponse orderFood(OrderRequest request) {
-        List<MenuEntity> menus = repository.findAllById(request.getMenuIds());
+        List<MenuEntity> menus = menuRepository.findAllById(request.getMenuIds());
         if (menus.isEmpty()) {
-            throw new MenuNotFoundException("Menu id not found");
+            throw new NotFoundException("Menu id not found");
         }
         BigDecimal totalPrice = ZERO;
         for (MenuEntity menu : menus) {
@@ -70,17 +67,13 @@ public class MenuServiceİmpl implements MenuService {
                 .userId(request.getUserId())
                 .amount(totalPrice)
                 .build();
-        PaymentResponse paymentResponse = paymentClient.makePayment(pay);
-        return PaymentResponse.builder()
-                .id(paymentResponse.getId())
-                .userId(pay.getUserId())
-                .amount(pay.getAmount())
-                .build();
+
+        return paymentClient.makePayment(pay);
     }
 
     private MenuEntity fetchMenuIfExist(Long id) {
-        return repository.findById(id).orElseThrow(() ->
-                new MenuNotFoundException("Menu not found: " + id));
+        return menuRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Menu not found: " + id));
     }
 
     private String getKey(Long id) {

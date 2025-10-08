@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "ms.payment",
-        url = "https://payment-texnoera.onrender.com/v1/payments"
+        url = "${ms.payment.url}"
 )
 public interface PaymentClient {
     @PostMapping
